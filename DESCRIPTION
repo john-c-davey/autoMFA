@@ -1,0 +1,60 @@
+Package: autoMFA
+Title: Algorithms for Automatically Fitting MFA Models
+Version: 1.1.0
+Authors@R: c(
+    person(given = "John",
+           family = "Davey",
+           role = c("aut", "cre"),
+           email = "john.c.m.davey@gmail.com"),
+    person(given = "Sharon",
+           family = "Lee",
+           role = "ctb"),
+    person(given = "Garique",
+           family = "Glonek",
+           role = "ctb"),
+    person(given = "Suren",
+           family = "Rathnayake",
+           role = "ctb"),
+    person(given = "Geoff",
+           family = "McLachlan",
+           role = "ctb"),
+    person(given = "Albert Ali",
+           family = "Salah",
+           role = "ctb"),
+    person(given = "Heysem",
+           family = "Kaya",
+           role = "ctb"))    
+Description: Provides methods for fitting the Mixture of Factor Analyzers (MFA) 
+    model automatically. The MFA model is a mixture model where each sub-population
+    is assumed to follow the Factor Analysis (FA) model. The FA model is a latent 
+    variable model which assumes that observations are normally distributed, but 
+    imposes constraints on their covariance matrix. The MFA model contains two 
+    hyperparameters; g (the number of components in the mixture) and q (the number
+    of factors in each component Factor Analysis model). Usually, the 
+    Expectation-Maximisation algorithm would be used to fit the MFA model, but this
+    requires g and q to be known. This package treats g and q as unknowns and 
+    provides several methods which infer these values with as little input from 
+    the user as possible. The available methods are a naïve search over both g and 
+    q, two different implementations of the AMFA algorithm (Wang and Lin, 2020) 
+    <doi = 10.1007/s11749-020-00702-6>, the AMoFA algorithm (Kaya and Salah, 2015) 
+    <doi = 10.48550/arXiv.1507.02801> and the VBMFA algorithm 
+    (Ghahramani and Beal, 2000) 
+    <url = https://mlg.eng.cam.ac.uk/zoubin/papers/nips99.pdf>. 
+Depends: R (>= 3.5.0)
+License: GPL (>= 3)
+Imports:
+    abind,
+    MASS,
+    Matrix,
+    Rfast,
+    expm,  
+    stats,
+    utils,
+    Rdpack,
+    pracma,
+    ggsci
+RdMacros: Rdpack
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
