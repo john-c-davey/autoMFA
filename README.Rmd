@@ -1,0 +1,46 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# autoMFA
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of autoMFA is to fit the Mixture of Factor Analyzers (MFA) model with as few inputs from users as possible. Specifically, it aims to provide methods which can automatically determine the number of components, g, and the number of factors, q, without them needing to be specified by the user.
+
+## Installation
+
+You can install the released version of autoMFA from [CRAN](https://CRAN.R-project.org) with:
+
+``` r
+install.packages("autoMFA")
+```
+
+## Example
+
+This is a basic example which shows you how to fit an MFA model using autoMFA, and how we can access the output structure:
+
+```{r example}
+library(autoMFA)
+RNGversion('4.0.3'); set.seed(3)
+MFA.fit <- AMFA(autoMFA::MFA_testdata,3,3, nkmeans = 3, nrandom = 3, itmax = 100)
+#Looking at the fitted model parameters
+MFA.fit$model
+#How long did it take for each start to fit?
+MFA.fit$diagnostics$times
+#Lets look at the clusterings of the fitted model
+MFA.fit$clustering$allocations
+```
+

@@ -1,0 +1,189 @@
+\begin{thebibliography}{23}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Beal(2003)}]{bealthesis}
+Beal MJ (2003).
+\newblock \emph{Variational {A}lgorithms for {A}pproximate {B}ayesian
+  {I}nference}.
+\newblock Ph.D. thesis, University College London, The Gatsby Computational
+  Neuroscience Unit, University College London, 17 Queen Square, London WC1N
+  3AR.
+
+\bibitem[{Davey(2021)}]{autoMFA}
+Davey J (2021).
+\newblock \emph{\pkg{autoMFA}: {A}lgorithms for {A}utomatically {F}itting
+  {M}{F}{A} {M}odels}.
+\newblock \textsf{R} package version 1.0.0,
+  \urlprefix\url{https://cran.r-project.org/package=autoMFA}.
+
+\bibitem[{Dempster \emph{et~al.}(1977)Dempster, Laird, and Rubin}]{DempsterEM}
+Dempster AP, Laird NM, Rubin DB (1977).
+\newblock \enquote{Maximum {L}ikelihood from {I}ncomplete {D}ata via the {EM}
+  {A}lgorithm.}
+\newblock \emph{Journal of the {R}oyal {S}tatistical {S}ociety. {S}eries {B}
+  ({M}ethodological)}, \textbf{39}(1), 1--38.
+\newblock ISSN 00359246.
+\newblock \urlprefix\url{http://www.jstor.org/stable/2984875}.
+
+\bibitem[{Ghahramani and Beal(2000)}]{ghahramani2000variational}
+Ghahramani Z, Beal MJ (2000).
+\newblock \enquote{Variational {I}nference for {B}ayesian {M}ixtures of
+  {F}actor {A}nalysers.}
+\newblock In \emph{{A}dvances in {N}eural {I}nformation {P}rocessing
+  {S}ystems}, pp. 449--455.
+
+\bibitem[{Ghahramani \emph{et~al.}(1997)Ghahramani, Hinton
+  \emph{et~al.}}]{ghahramani1996algorithm}
+Ghahramani Z, Hinton GE, \emph{et~al.} (1997).
+\newblock \enquote{The {EM} {A}lgorithm for {M}ixtures of {F}actor
+  {A}nalyzers.}
+\newblock \emph{Technical report}.
+
+\bibitem[{Kaiser(1958)}]{varimax}
+Kaiser HF (1958).
+\newblock \enquote{The {V}arimax {C}riterion for {A}nalytic {R}otation in
+  {F}actor {A}nalysis.}
+\newblock \emph{Psychometrika}, \textbf{23}, 187--200.
+\newblock \doi{https://doi.org/10.1007/BF02289233}.
+
+\bibitem[{Kaya and Salah(2015)}]{kaya2015adaptive}
+Kaya H, Salah AA (2015).
+\newblock \enquote{Adaptive {M}ixtures of {F}actor {A}nalyzers.}
+\newblock \emph{arXiv {P}reprint arXiv:1507.02801}.
+
+\bibitem[{Ko and Baek(2018)}]{VaR-MFA}
+Ko K, Baek J (2018).
+\newblock \enquote{{VaR} {E}stimation {U}sing {S}kewed {M}ixture {M}odels and
+  {V}arious {M}ixtures of {F}actor {A}nalyzers.}
+\newblock \emph{Journal of the {K}orean {D}ata and {I}nformation {S}cience
+  {S}ociety}, \textbf{29}(3), 769 -- 778.
+\newblock
+  \urlprefix\url{http://www.kdiss.org/journal/view.html?spage=769&volume=29&number=3#body01}.
+
+\bibitem[{Ledermann(1937)}]{Ledermann37}
+Ledermann W (1937).
+\newblock \enquote{On the {R}ank of the {R}educed {C}orrelational {M}atrix in
+  {M}ultiple-factor {A}nalysis.}
+\newblock \emph{Psychometrika}, \textbf{2}, 85--93.
+\newblock \doi{https://doi.org/10.1007/BF02288062}.
+
+\bibitem[{Lee(2019)}]{LeeCyto}
+Lee SX (2019).
+\newblock \enquote{CytoFA: {A}utomated {G}ating of {M}ass {C}ytometry {D}ata
+  via {R}obust {S}kew {F}actor {A}nalzyers.}
+\newblock In \emph{{A}dvances in {K}nowledge {D}iscovery and {D}ata {M}ining},
+  pp. 514--525. Springer International Publishing, Cham.
+\newblock ISBN 978-3-030-16148-4.
+\newblock \doi{10.1007/978-3-030-16148-4_40}.
+
+\bibitem[{Maruotti \emph{et~al.}(2017)Maruotti, Bulla, Lagona, Picone, and
+  Martella}]{10.1214/17-AOAS1049}
+Maruotti A, Bulla J, Lagona F, Picone M, Martella F (2017).
+\newblock \enquote{{D}ynamic {M}ixtures of {F}actor {A}nalyzers to
+  {C}haracterize {M}ultivariate {A}ir {P}ollutant {E}xposures.}
+\newblock \emph{The {A}nnals of {A}pplied {S}tatistics}, \textbf{11}(3), 1617
+  -- 1648.
+\newblock \doi{10.1214/17-AOAS1049}.
+
+\bibitem[{McLachlan and Peel(2000)}]{m2000}
+McLachlan G, Peel D (2000).
+\newblock \enquote{Mixtures of {F}actor {A}nalyzers.}
+\newblock In \emph{Proceedings of the {S}eventeenth {I}nternational
+  {C}onference on {M}achine {L}earning}, Langley, {P} ({E}d.), pp. 599--606.
+  Morgan {K}aufmann, San {F}rancisco.
+
+\bibitem[{Mclachlan \emph{et~al.}(2003)Mclachlan, Peel, and
+  Bean}]{mclachlanAECM}
+Mclachlan G, Peel D, Bean R (2003).
+\newblock \enquote{Modelling {H}igh-{D}imensional {D}ata by {M}ixtures of
+  {F}actor {A}nalyzers.}
+\newblock \emph{Computational {S}tatistics \& {D}ata {A}nalysis}, \textbf{41},
+  379--388.
+\newblock \doi{10.1016/S0167-9473(02)00183-4}.
+
+\bibitem[{{M}eng and {R}ubin(1993)}]{ECM}
+{M}eng X, {R}ubin D (1993).
+\newblock \enquote{Maximum {L}ikelihood {E}stimation via the {ECM} {A}lgorithm:
+  {A} {G}eneral {F}ramework.}
+\newblock \emph{Biometrika}, \textbf{80}(2), 267--278.
+\newblock ISSN 00063444.
+\newblock \urlprefix\url{http://www.jstor.org/stable/2337198}.
+
+\bibitem[{{M}eng and {van~{D}yk}(1997)}]{AECM}
+{M}eng X, {van~{D}yk} D (1997).
+\newblock \enquote{The {EM} {A}lgorithm - {A}n {O}ld {F}olk-{S}ong {S}ung to a
+  {F}ast {N}ew {T}une.}
+\newblock \emph{Journal of the {R}oyal {S}tatistical {S}ociety. {S}eries {B}
+  ({M}ethodological)}, \textbf{59}(3), 511--567.
+\newblock ISSN 00359246.
+\newblock \urlprefix\url{http://www.jstor.org/stable/2346009}.
+
+\bibitem[{Murphy \emph{et~al.}(2021)Murphy, Viroli, and Gormley}]{IMIFA}
+Murphy K, Viroli C, Gormley IC (2021).
+\newblock \emph{\pkg{IMIFA}: {I}nfinite {M}ixtures of {I}nfinite {F}actor
+  {A}nalysers and {R}elated {M}odels}.
+\newblock \textsf{R} package version 2.1.8,
+  \urlprefix\url{https://cran.r-project.org/package=IMIFA}.
+
+\bibitem[{Papastamoulis(2018)}]{fabMix}
+Papastamoulis P (2018).
+\newblock \enquote{Overfitting {B}ayesian {M}ixtures of {F}actor {A}nalyzers
+  {w}ith {a}n {U}nknown {N}umber of {C}omponents.}
+\newblock \emph{Computational Statistics and Data Analysis}, \textbf{124},
+  220--234.
+\newblock \doi{10.1016/j.csda.2018.03.007}.
+
+\bibitem[{{R Core Team}(2021)}]{R}
+{R Core Team} (2021).
+\newblock \emph{\proglang{R}: {A} {L}anguage and {E}nvironment for
+  {S}tatistical {C}omputing}.
+\newblock R Foundation for Statistical Computing, Vienna, Austria.
+\newblock \urlprefix\url{https://www.R-project.org/}.
+
+\bibitem[{Rathnayake \emph{et~al.}(2019)Rathnayake, McLachlan, Peel, Baek, and
+  {R Core Team}}]{EMMIXmfa}
+Rathnayake S, McLachlan G, Peel D, Baek J, {R Core Team} (2019).
+\newblock \emph{\pkg{EMMIXmfa}: {M}ixture {M}odels with {C}omponent-{W}ise
+  {F}actor {A}nalyzers}.
+\newblock R package version 2.0.11,
+  \urlprefix\url{https://CRAN.R-project.org/package=EMMIXmfa}.
+
+\bibitem[{Schwarz(1978)}]{BIC}
+Schwarz G (1978).
+\newblock \enquote{Estimating the Dimension of a Model.}
+\newblock \emph{The Annals of Statistics}, \textbf{6}(2), 461--464.
+\newblock ISSN 00905364.
+\newblock \urlprefix\url{http://www.jstor.org/stable/2958889}.
+
+\bibitem[{Wang and Lin(2020)}]{amfa}
+Wang WL, Lin T (2020).
+\newblock \enquote{Automated {L}earning of {M}ixtures of {F}actor {A}nalysis
+  {M}odels with {M}issing {I}nformation.}
+\newblock \emph{{TEST}}, \textbf{29}.
+\newblock \doi{10.1007/s11749-020-00702-6}.
+
+\bibitem[{Yang \emph{et~al.}(1999)Yang, Ahuja, and Kriegman}]{facedetection}
+Yang M, Ahuja N, Kriegman D (1999).
+\newblock \enquote{Face {D}etection using a {M}ixture of {F}actor {A}nalyzers.}
+\newblock In \emph{Proceedings 1999 {I}nternational {C}onference on {I}mage
+  {P}rocessing ({C}at. 99CH36348)}, volume~3, pp. 612--616 vol.3.
+\newblock \doi{10.1109/ICIP.1999.817188}.
+
+\bibitem[{Zhao and Yu(2008)}]{Jian-HuaZhao2008FMEf}
+Zhao JH, Yu P (2008).
+\newblock \enquote{Fast {M}{L} {E}stimation for the {M}ixture of {F}actor
+  {A}nalyzers via an {E}{C}{M} {A}lgorithm.}
+\newblock \emph{{IEEE} {T}ransactions on {N}eural {N}etworks}, \textbf{19}(11),
+  1956--1961.
+\newblock ISSN 1045-9227.
+\newblock \doi{https://doi.org/10.1109/TNN.2008.2003467}.
+
+\end{thebibliography}

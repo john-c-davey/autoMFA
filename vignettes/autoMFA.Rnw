@@ -1,0 +1,460 @@
+\documentclass[nojss]{jss}
+
+%% -- LaTeX packages and custom commands ---------------------------------------
+
+%% recommended packages
+\usepackage{orcidlink,thumbpdf,lmodern}
+
+%% another package (only for this demo article)
+\usepackage{framed}
+\usepackage{pifont}
+\usepackage{amsmath,multirow}
+%% new custom commands
+\newcommand{\class}[1]{`\code{#1}'}
+\newcommand{\fct}[1]{\code{#1()}}
+
+%% For Sweave-based articles about R packages:
+%% need no \usepackage{Sweave}
+\SweaveOpts{engine=R, eps=FALSE, keep.source = TRUE, concordance=FALSE}
+<<preliminaries, echo=FALSE, results=hide>>=
+options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+library("MASS") 
+library(autoMFA)
+@
+
+
+%% -- Article metainformation (author, title, ...) -----------------------------
+
+%% - \author{} with primary affiliation (and optionally ORCID link)
+%% - \Plainauthor{} without affiliations
+%% - Separate authors by \And or \AND (in \author) or by comma (in \Plainauthor).
+%% - \AND starts a new line, \And does not.
+\author{John Davey~\orcidlink{0000-0003-0448-7461}\\The University of Adelaide
+   \And Gary Glonek \\ The University of Adelaide \AND Sharon Lee \\ The University of Queensland }
+\Plainauthor{John Davey, Sharon Lee, Sharon Lee}
+
+%% - \title{} in title case
+%% - \Plaintitle{} without LaTeX markup (if any)
+%% - \Shorttitle{} with LaTeX markup (if any), used as running title
+\title{The \pkg{autoMFA} Package for Automatically Fitting the Mixture of Factor Analyzers Model in \proglang{R}.}
+\Plaintitle{The autoMFA Package for Automatically Fitting the Mixture of Factor Analyzers Model in R}
+\Shorttitle{The \pkg{autoMFA} Package in \proglang{R}}
+
+%% - \Abstract{} almost as usual
+\Abstract{This article introduces the \pkg{autoMFA} package for \proglang{R}, which includes five methods for automatically fitting the mixture of factor analyzers (MFA) model. Some of the methods in this package have existing MATLAB implementations, but this is the first implementation of them to be available on the Comprehensive \proglang{R} Archive Network (CRAN). Each method infers the number of components, \(g\) and the number of factors, \(q\) with as little input from the user as possible. The \pkg{autoMFA} package also provides diagnostic and clustering information for the methods implemented, including log-likelihood values and the predicted clustering.
+}
+
+%% - \Keywords{} with LaTeX markup, at least one required
+%% - \Plainkeywords{} without LaTeX markup (if necessary)
+%% - Should be comma-separated and in sentence case.
+\Keywords{clustering, mixture models, factor analysis, \proglang{R}}
+\Plainkeywords{clustering, mixture models, factor analysis, R}
+
+%% - \Address{} of at least one author
+%% - May contain multiple affiliations for each author
+%%   (in extra lines, separated by \emph{and}\\).
+%% - May contain multiple authors for the same affiliation
+%%   (in the same first line, separated by comma).
+\Address{
+  John Davey\\
+  School of Mathematical Sciences\\
+  Faculty of Sciences, Engineering and Technology\\
+  University of Adelaide\\
+  Adelaide, Australia\\
+  E-mail: \email{j.davey@adelaide.edu.au}\\
+}
+
+
+\begin{document}
+%\SweaveOpts{concordance=TRUE}
+
+%% -- Introduction -------------------------------------------------------------
+
+%% - In principle "as usual".
+%% - But should typically have some discussion of both _software_ and _methods_.
+%% - Use \proglang{}, \pkg{}, and \code{} markup throughout the manuscript.
+%% - If such markup is in (sub)section titles, a plain text version has to be
+%%   added as well.
+%% - All software mentioned should be properly \cite-d.
+%% - All abbreviations should be introduced.
+%% - Unless the expansions of abbreviations are proper names (like "Journal
+%%   of Statistical Software" above) they should be in sentence case (like
+%%   "generalized linear models" below).
+
+\section{Introduction: The mixture of factor analyzers model} \label{sec:intro}
+
+%% -- Manuscript ---------------------------------------------------------------
+
+%% - In principle "as usual" again.
+%% - When using equations (e.g., {equation}, {eqnarray}, {align}, etc.
+%%   avoid empty lines before and after the equation (which would signal a new
+%%   paragraph.
+%% - When describing longer chunks of code that are _not_ meant for execution
+%%   (e.g., a function synopsis or list of arguments), the environment {Code}
+%%   is recommended. Alternatively, a plain {verbatim} can also be used.
+%%   (For executed code see the next section.)
+
+% Make the following tables
+The mixture of factor analyzers (MFA) model is a multivariate statistical model which can simultaneously perform clustering and local dimension reduction, introduced by \cite{ghahramani1996algorithm}, who also proposed a closed form algorithm for fitting the model. \cite{m2000} provide further discussion of the model as well as an alternate fitting model fitting procedure. The original model has been applied to various problems, such as the clustering of cell lines on the basis of gene expressions from microarray experiments \citep{mclachlanAECM} and in image processing, where it has been used for face detection \citep{facedetection}.
+
+More recently, various extensions of the MFA model have been applied to the characterisation of multivariate air pollutant exposures \citep{10.1214/17-AOAS1049}, the estimation of value at risk in investment portfolios \citep{VaR-MFA} and the automated gating of mass cytometry data \citep{LeeCyto}. 
+
+The MFA model is a mixture model where each component of the mixture follows the well known factor analysis (FA) model. For a \(p\)-dimensional data vector \(Y_j\), the MFA model is 
+\begin{align*}
+    &{Z}_j \sim \operatorname{Multinomial}(1, {\pi})\\
+    &{Y}_j \mid ( Z_{ij} = 1 ) = {\mu}_i + {B}_i {U}_j + {e}_j, 
+\end{align*}
+independently for \( i = 1,\dots,g\) and \(j = 1,\dots,n  \), where 
+\[ {U}_j \sim \mathcal{N}_{q}({0}, {I}) \text{ and } {e}_j \sim \mathcal{N}_p ({0}, {D}_i)\] independently. 
+
+As the MFA model is a mixture model, each \(p\)-dimensional data point \( {Y}_j \) is associated with a \(g\)-dimensional indicator vector \( {Z}_j \) which identifies the component to which \( {Y}_j \) belongs. The proportion of data in component \( i \) is given by the mixing proportion \( \pi_i \), where \( 0 \leq \pi_i \leq 1\) for \(i = 1,\dots, n\) and \( \sum_i \pi_i = 1 \) . Each data point is also associated with a \(q_i \)-dimensional vector \({U}_j\) called the factors, where \(q_i < p \) for \( i = 1,\dots,g \).
+
+Conditioned on data point \( {Y}_j \) belonging to component \(i\), \( {Y}_j \) follows the FA model with \(p\times 1\) mean vector \( \mu_i \), \(p\times q\) factor loading matrix \( B_i \) and \(p\times p\) diagonal error variance matrix \(D_i\).
+
+Under the MFA model
+\begin{equation} {Y}_j \mid ( Z_{ij} = 1 ) \sim \mathcal{N}_{p}({\mu}_i , {B}_i {B}_i^\top + {D}_i ), \label{MFA} \end{equation}
+which shows that the MFA model is a Gaussian mixture model (GMM) where each component has a restricted covariance matrix.
+
+To maintain identifiability, the number of factors, \(q_j\), are required to obey the Ledermann bound \citep{Ledermann37}, 
+\begin{equation} q_i \leq p + \frac{1 - \sqrt{1 + 8p} }{2}, \label{eq:led} \end{equation}
+for all \(i\). This bound ensures that the number of parameters required to fit the MFA model is less than the number required to fit a full-covariance GMM.
+
+The model is often simplified by assuming a common number of factors, \(q\), for all of the components in the mixture. This assumption is made in all of the methods included in \pkg{autoMFA}, apart from \code{amofa}. Another popular simplification is to assume a common diagonal matrix \( {D} \) for all of the components in the mixture. Of the algorithms implemented in \pkg{autoMFA}, only the \code{vbmfa} method makes this assumption.
+
+The traditional method of estimation for the MFA model is by maximum likelihood estimation via the expectation maximisation (EM) algorithm \citep{DempsterEM}. To fit this model, both the number of components, \(g\) and the number of factors, \( q \) are required. However, for a given dataset, it is not always obvious what values to these hyperparameters should take. This package provides several methods which automatically choose sensible values for \( g\) and \(q\) with as little input from the user as possible, and then fit the resulting MFA model.
+
+Even when the Ledermann bound is satisfied for each \(i\), the MFA model still suffers from an identifiability issue since the distribution of \( {Y}_j  \mid ( z_{ij} = 1 ) \)  only depends on the factor loading matrices \( {B}_i \) through the term \( {B}_i {B}_i^\top \). As a result, if \( \tilde{{B}}_i  \) is a maximum likelihood estimate for the factor loadings of component \(i\), then for any \( q_i \times q_i \) orthogonal matrix \( {V} \), the log-likelihoods of \( \tilde{{B}}_i \) and \( \tilde{{B}}_i {V} \) will be the same. To achieve identifiability, \( \frac{1}{2} q_i (q_i + 1) \) constraints must be imposed on the estimated loading matrix \( \tilde{{B}}_i \). One approach to applying these constraints is the varimax rotation \citep{varimax}. Each method in \pkg{autoMFA} has the optional input \code{varimax}. While the default option is \code{FALSE}, if set to \code{TRUE} then each of the factor loading matrices in the fitted model will have been subject to the varimax rotation via the \code{varimax} function from the \pkg{stats} package. 
+
+The \pkg{autoMFA} \citep{autoMFA} package provides 5 different methods for automatically fitting the MFA model using \proglang{R} \citep{R}. Users may also be interested in the \proglang{R} packages \pkg{fabMix} \citep{fabMix} and \pkg{IMIFA} \citep{IMIFA}, which both provide methods for automatically fitting the MFA model using Bayesian frameworks. The \pkg{EMMIXmfa} \citep{EMMIXmfa} may also be of interest, which provides a method for fitting MFA models when \(g\) and \(q\) are known. 
+
+\section{Available methods}
+\label{sec:methods}
+For given values of \(g\) and \(q\), the traditional way to fit the MFA model is using an EM-type algorithm. We highlight three such schemes here. The first EM-type algorithm for the MFA model to be proposed was an expectation conditional maximisation (ECM) algorithm \citep{ECM} derived by \cite{ghahramani1996algorithm}. This algorithm treats both the indicator vectors \(Z_j\) and the factor vectors \(U_j\) as latent variables. Later, \cite{m2000} proposed an alternating expectation conditional maximisation (AECM) algorithm \citep{AECM} which treats the indicator vectors \( Z_{j} \) alone as the latent variables for one cycle, and then treats both the indicator vectors \(Z_j\) and the factor vectors \(U_j\) as latent variables in the other cycle. With less latent variables used in the first cycle, by the general rate of convergence properties for the EM algorithm discussed in \cite{DempsterEM}, the AECM should in general converge faster than the original ECM scheme. Most recently, \cite{Jian-HuaZhao2008FMEf} proposed an ECM algorithm which only treats the indicator vectors \( Z_j \) as latent variables. They showed that by avoiding treating the factors \(U_j\) as latent variables altogether, their ECM scheme generally achieves a much higher rate of convergence than the two other algorithms.
+
+There are currently five methods included in the \pkg{autoMFA} package for automatically fitting the MFA model. Table~\ref{infer} summarises whether each algorithm can automatically estimate \(g\) and \(q\). Here, we do not consider an exhaustive search over a specified parameter space as automatic inference. A short description of the available methods follows.
+
+%\begin{table}[t!]
+%    \centering
+%    \begin{tabular}{lll}
+%    \hline
+%    {Name} & {Infers \(g\)} & {Infers \(q\)} \\ \hline
+%    \code{MFA\_ECM}      &       No        & No       \\ 
+%    \code{amofa}         &        Yes   & Yes         \\ 
+%    \code{vbmfa}         &           Yes &    No            \\ 
+%    \code{AMFA}          &            No   &  Yes            \\ 
+%    \code{AMFA.inc}      &             Yes  &  Yes               \\ 
+%    \end{tabular}
+%    \caption{The different methods available in the  \pkg{autoMFA} package and the parameters of the MFA model that they can automatically estimate. Note that an exhaustive search over a specified parameter space is not considered automatic inference. In the above, \(g\) represents the number of components in the MFA model, whereas \(q\) represents the number of factors.} \label{infer}
+%\end{table}
+
+\begin{table}[t!]
+    \centering
+    \begin{tabular}{lll}
+    \hline
+    {Name} & {Infers \(g\)} & {Infers \(q\)} \\ \hline
+    \code{MFA\_ECM}      &       \ding{55}        & \ding{55}         \\ 
+    \code{amofa}         &        \ding{51}   & \ding{51}         \\ 
+    \code{vbmfa}         &           \ding{51} &    \ding{55}              \\ 
+    \code{AMFA}          &            \ding{55}     &  \ding{51}            \\ 
+    \code{AMFA\_inc}      &             \ding{51}  &  \ding{51}               \\ 
+    \end{tabular}
+    \caption{The different methods available in the  \pkg{autoMFA} package and the parameters of the MFA model that they can automatically estimate. Note that an exhaustive search over a specified parameter space is not considered automatic inference. In the above, \(g\) represents the number of components in the MFA model, whereas \(q\) represents the number of factors.} \label{infer}
+\end{table}
+
+The \code{MFA\_ECM} method performs a naive grid search over all values of \( g\) and \( q \) in a user specified range. Two initialisation schemes are used; random starts and \(k\)-means clustering. By specifying the number of random initialisations and the number of \(k\)-means initialisations, users can specify how many MFA models are fitted for each combination of \(g\) and \(q\). The MFA models are fitted using the ECM algorithm for the MFA model as described in \cite{Jian-HuaZhao2008FMEf}. Users can choose between two convergence criteria; the absolute difference in log-likelihood between the current iteration and the previous iteration or the ratio of the absolute difference in log-likelihood over the log-likelihood at the previous iteration. Users also specify a maximum number of ECM iterations to be used in fitting each model. The ECM iterations are terminated once the maximum number of iterations is reached, even if the convergence criterion has not yet been met. The best model is chosen according to the Bayesian information criterion (BIC) \citep{BIC}. 
+
+The \code{amofa} method is an implementation of the adaptive mixtures of factor analyzers (AMoFA) algorithm described in \cite{kaya2015adaptive}. The algorithm comprises two phases: incremental and decremental. In the former, it progressively adds a new component or adds a new factor to an existing component until a criterion based on the minimum message length (MML) is met. In the latter phase, the algorithm chooses to remove a component from the mixture using a criterion based on the posterior probabilities of each point belonging to each component, until only one component remains. The final model is the model which obtained the lowest MML value over both phases. The fitting of each candidate model is performed using a slightly modified version of the ECM algorithm for the MFA model described in \cite{ghahramani1996algorithm}. As mentioned earlier, this method does not assume that the number of factors is the same in each component. 
+
+The \code{vbmfa} method is an implementation of the variational bayesian mixtures of factor analyzers (VBMFA) algorithm given by \cite{ghahramani2000variational}. It is an incremental algorithm, which starts with a single component and infers the number of components, \(g\), by splitting existing components into two sub-components. As the name suggests, this method is based on a Bayesian MFA model, making it unique among the methods in this package, as the rest are all based on the EM-type algorithms. The authors recommend centering and scaling data before applying the VBMFA algorithm to improve the quality of the fitted models. Hence, the \code{preprocess} method is also included with the \pkg{autoMFA} package. This method centers and scales the data as suggested by the authors, so \code{vbmfa} should be run on the output of \code{preprocess}. It should be noted that while \cite{bealthesis} suggests that this method will infer the number of factors by producing very small factor loadings in some columns of the factor loading matrices, we have been unable to reproduce this behaviour. 
+
+The \code{AMFA} method is an implementation of the automated mixtures of factor analyzers (AMFA) algorithm from \cite{amfa}. Similar to the \code{ECM\_MFA} method, this method is also based on the ECM algorithm for the MFA model proposed by \cite{Jian-HuaZhao2008FMEf}. However, the \code{AMFA} method automatically infers \( q \) by treating it as a parameter in the ECM framework. This is achieved by using an approximation of the BIC to choose the best value of \( q \) among the set \( \{ 1, \dots, q' \} \), where \( q' \) is the largest value of \( q \) satisfying the Ledermann constraint. The number of components, \( g \) is inferred using a naive search over a user-specified range.
+
+Finally, the \code{AMFA\_inc} method chooses \( q \) in the same way as the \code{AMFA} method, but employs an incremental approach to determine the number of components \( g \). It starts with a single component model and then chooses to split a component into two sub-components using the same heuristic as \code{amofa}. This process continues until the algorithm has attempted to split all of the components in the mixture a specified number of times and no improvement to the BIC has been made. 
+
+\section{Package usage}
+We now describe the inputs and outputs for each of the methods described in Section~\ref{sec:methods}.
+
+\subsection{Inputs}
+
+The inputs of the methods in the \pkg{autoMFA} package are summarised as follows. 
+
+
+\subsubsection{Inputs common to all methods}
+
+\begin{itemize}
+    \item \code{Y}; An \( n \times p \) data matrix containing the data set that the model will be fitted to. Each row represents one data point. 
+    \item \code{varimax}; A boolean indicating whether or not the output factor loading matrices should be constrained using varimax rotation. Defaults to \code{FALSE}.
+\end{itemize}
+
+ \subsubsection[Inputs common to the AMFA, AMFAinc and MFAECM methods]{Inputs common to the \code{AMFA}, \code{AMFAinc} and \code{MFAECM} methods}
+
+\begin{itemize}
+    \item \code{eta}; The smallest possible entry in any of the error variance matrices. See \cite{Jian-HuaZhao2008FMEf} for more information. The default value is \(5e-3\)
+    \item\code{nkmeans}; The number of times that \(k\)-means clustering will be used to initialise models for each combination of g and q. The default value is 5.
+    \item \code{nrandom}; The number of randomly initialised models that will be used for each combination of g and q. The default value is 5.
+    \item \code{tol}; The ECM algorithm terminates if the measure of convergence falls below this value. The default value is \(1e-5\).
+    \item \code{conv\_measure}; The convergence measure of the ECM algorithm. The default, \code{diff}, stops the ECM iterations if \( |l^{(k+1)} - l^{(k)}| <\) \code{tol} where \(l^{(k)}\) is the log-likelihood at the \(k^{th}\) ECM iteration. The alternative, \code{ratio}, measures the convergence of the ECM iterations using \( |(l^{(k+1)} - l^{(k)})/l^{(k+1)}| \).
+\end{itemize}
+
+\subsubsection[Inputs common to the AMFA, AMFAinc, MFAECM and amofa methods]{Inputs common to the \code{AMFA}, \code{AMFAinc}, \code{MFAECM} and \code{amofa} methods}
+\begin{itemize}
+    \item \code{itmax}; The maximum number of EM or ECM iterations allowed when fitting any MFA model. For \code{amofa} this defaults to 100, for the other methods the default is 500.
+\end{itemize}
+
+\subsubsection[Inputs common to the AMFA and MFAECM methods]{Inputs common to the \code{AMFA} and \code{MFAECM} methods}
+\begin{itemize}
+    \item \code{gmin}; The smallest number of components for which an MFA model will be fitted. The default value is 1.
+    \item \code{gmax}; The largest number of components for which an MFA model will be fitted. The default value is 10.
+\end{itemize}
+ 
+\subsubsection[Inputs common to the amofa and vbmfa methods]{Inputs common to \code{amofa} and \code{vbmfa} methods}
+\begin{itemize}
+    \item \code{verbose}; A boolean variable controlling whether or not detailed output should be printed to the console during the fitting process. The default value is \code{FALSE}.
+\end{itemize} 
+
+\subsubsection[Inputs common to the AMFAinc and vbmfa methods]{Inputs common to the \code{AMFAinc} and \code{vbmfa} methods}
+\begin{itemize}
+    \item \code{numTries}; The number of attempts that should be made to split each component. The default value is 2.
+\end{itemize}
+ 
+\subsubsection[Inputs unique to the MFAECM method]{Inputs unique to the \code{MFAECM} method}
+\begin{itemize}
+    \item \code{qmin}; The smallest number of components for which an MFA model will be fitted. The default value is 1.
+    \item \code{qmax}; The largest number of components for which an MFA model will be fitted. The default value is the largest possible \(q\) satisfying the Ledermann bound.
+\end{itemize}
+
+%\subsubsection[Inputs unique to the VBMFA method]{Inputs unique to the \code{VBMFA} method}
+%\begin{itemize}
+%    \item \code{maxTries}; The number of attempts that should be made to split each component. The default value is 3.
+%\end{itemize}
+
+
+%\begin{table}[t!]
+%    \centering
+%    \begin{tabular}{llllll}
+%    \hline
+%    {Input} & \code{MFA\_ECM} & \code{amofa} &\code{vbmfa} & \code{AMFA} & \code{AMFA.inc} \\ \hline
+%    \code{Y} & Yes & Yes & Yes & Yes & Yes \\
+%    \code{varimax} & Yes & Yes & Yes & Yes & Yes \\
+%    \code{eta} & Yes & No & No & Yes & Yes \\
+%    \code{nkmeans} & Yes & No & No & Yes & Yes \\
+%    \code{nrandom} & Yes & No & No & Yes & Yes \\
+%    \code{tol} & Yes & No & No & Yes & Yes \\
+%    \code{conv_measure} & Yes & No & No & Yes & Yes \\
+%    \code{itmax} & Yes & Yes & No & Yes & Yes \\
+%    \code{gmin} & Yes & No & No & Yes & No \\
+%    \code{gmax} & Yes & No & No & Yes & No \\
+%    \code{qmin} & Yes & No & No & No & No \\
+%    \code{qmax} & Yes & No & No & No & No \\
+%    \code{verbosex} & No & Yes & Yes & No & No \\
+%    \code{numTries} & No & No & No & No & Yes \\
+%    \code{maxTries} & No & No & Yes & No & No \\
+%    \end{tabular}
+%    \caption{Summary of inputs for each method in \pkg{autoMFA}.} \label{inputs}
+%\end{table}
+
+\begin{table}[t!]
+    \centering
+    \begin{tabular}{llllll}
+    \hline
+    {Input} & \code{MFA\_ECM} & \code{amofa} &\code{vbmfa} & \code{AMFA} & \code{AMFA\_inc} \\ \hline
+    \code{Y} & \ding{51} & \ding{51} & \ding{51} & \ding{51} & \ding{51} \\
+    \code{varimax} & \ding{51} & \ding{51} & \ding{51} & \ding{51} & \ding{51} \\
+    \code{eta} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{nkmeans} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{nrandom} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{tol} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{conv_measure} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{itmax} & \ding{51} & \ding{51} & \ding{55} & \ding{51} & \ding{51} \\
+    \code{gmin} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{55} \\
+    \code{gmax} & \ding{51} & \ding{55} & \ding{55} & \ding{51} & \ding{55} \\
+    \code{qmin} & \ding{51} & \ding{55} & \ding{55} & \ding{55} & \ding{55} \\
+    \code{qmax} & \ding{51} & \ding{55} & \ding{55} & \ding{55} & \ding{55} \\
+    \code{verbose} & \ding{55} & \ding{51} & \ding{51} & \ding{55} & \ding{55} \\
+    \code{numTries} & \ding{55} & \ding{55} & \ding{51} & \ding{55} & \ding{51} \\
+    %\code{maxTries} & \ding{55} & \ding{55} & \ding{51} & \ding{55} & \ding{55} \\
+    \end{tabular}
+    \caption{Summary of inputs for each method in \pkg{autoMFA}.} \label{inputs}
+\end{table}
+
+Table~\ref{inputs} summarises the inputs for each method in \pkg{autoMFA}.
+\subsection{Outputs}
+The output of models fitted using any of the five methods from the \pkg{autoMFA} package share the structure summarised in Table~\ref{Output}. The returned object is an instance of the \code{MFA} class, which is a list with several elements. One of these is an object containing the estimates of the parameters of the MFA model, which is a list containing the mixing proportion vector \( {\pi} \), the factor loading matrices \( {B}_i \), error variance matrices \( {D}_i \) and mean vectors \( {\mu}_i \).
+
+Another element of the output object is the clustering information of the fitted model, which includes the posterior probabilities of each point belonging to each component of the mixture model, and the clustering implied by these posterior probabilities. 
+
+In addition, there will be an element in the output object which contains diagnostic information specific to the fitting process of each algorithm, including the BIC and log-likelihood of the fitted model, as well as the time taken to fit the model. 
+
+% \begin{table}[h]
+%     \centering
+%     \begin{tabular}{|l|l|l|}
+%     \hline
+%     \textbf{Object name}    & \textbf{Output list element} & \textbf{Description} \\ \hline
+%     \texttt{mu}               & \texttt{model}             &  The mean vectors              \\ \hline
+%     \texttt{B}                & \texttt{model}             &  The loading matrices              \\ \hline
+%     \texttt{D}               & \texttt{model}             &  The error variance matrices             \\ \hline
+%     \texttt{pivec}            & \texttt{model}             &  The mixing proportion vector              \\ \hline
+%     \texttt{numFactors}       & \texttt{model}             &  Number of factors for each component           \\ \hline
+%     \texttt{bic}              & \texttt{diagnostics}       &  Fitted model BIC              \\ \hline
+%     \texttt{logL}             & \texttt{diagnostics}       &  Fitted model log-likelihood              \\ \hline
+%     \texttt{totalTime}        & \texttt{diagnostics}       &  Total time to fit model              \\ \hline
+%     \texttt{responsibilities} & \texttt{clustering}       &  Posterior probabilities              \\ \hline
+%     \texttt{allocations}      & \texttt{clustering}        &  Posterior probability hard allocations              \\ \hline
+%     \end{tabular}
+%     \caption{The output information common to all \texttt{autoMFA} models.}\label{Output}
+%     \end{table}
+
+
+    \begin{table}[h]
+        \centering
+        %     \begin{adjustbox}{width=\textwidth,center}
+            % \begin{adjustbox}{center}
+                \begin{tabular}{lll}
+                    \hline
+                    {Output list component}   & {Object name}  & {Description} \\ \hline
+                    \multirow{5}{*}{\code{model}} & \code{mu}                 &  The mean vectors        \\ 
+                    & \code{B}                         &  The loading matrices              \\ 
+                    & \code{D}               &  The error variance matrices             \\ 
+                    &  \code{pivec}                   &  The mixing proportion vector      \\ 
+                   & \code{numFactors}               &  Number of factors for each component           \\ \cline{1-3}
+                    \multirow{3}{*}{\code{diagnostics}} &   \code{bic}               &       Fitted model BIC                      \\ 
+                    &      \code{logL}            &       Fitted model log-likelihood                       \\ 
+                    &        \code{totalTime}              &        Total time to fit model                       \\ \cline{1-3}
+                    \multirow{2}{*}{\code{clustering}} &    \code{responsibilities}              &      Posterior probabilities                  \\
+                    &      \code{allocations}            &     Posterior probability hard allocations                        \\ \cline{1-3}
+                \end{tabular}
+        %     \end{adjustbox}
+        %     \vspace{ - 05 mm}
+            \caption{The output information common to all \pkg{autoMFA} models.} \label{Output}
+        \end{table}
+
+
+Table~\ref{Output} summarises the structure of the output. For example, if our fitted model is called \code{MFAfit}, then the factor loading matrices can be retrieved using \code{MFAfit\$model\$B}. Similarly, the BIC can be retrieved with \code{MFAfit\$diagnostics\$bic}. All models in the \code{autoMFA} package will provide the information in the table above. However, given the issues discussed above with the \code{vbmfa} method not being able to infer the number of factors reliably, the user should be aware that its estimates of \code{numFactors} and \code{bic} will not be reliable.    
+
+%% -- Illustrations ------------------------------------------------------------
+
+%% - Virtually all JSS manuscripts list source code along with the generated
+%%   output. The style files provide dedicated environments for this.
+%% - In R, the environments {Sinput} and {Soutput} - as produced by Sweave() or
+%%   or knitr using the render_sweave() hook - are used (without the need to
+%%   load Sweave.sty).
+%% - Equivalently, {CodeInput} and {CodeOutput} can be used.
+%% - The code input should use "the usual" command prompt in the respective
+%%   software system.
+%% - For R code, the prompt "R> " should be used with "+  " as the
+%%   continuation prompt.
+%% - Comments within the code chunks should be avoided - these should be made
+%%   within the regular LaTeX text.
+
+\section{Illustrations} \label{sec:illustrations}
+
+The following example demonstrates how we can fit two MFA models, one using the \code{AMFA} method and the other using the \code{amofa} method. 
+
+The dataset we are using, \code{testDataMFA}, is included in \pkg{autoMFA}. It contains 720 observations of three dimensional data generated from an MFA model with three components and one factor for each component. The component means are \( \mu_1 = (3,0,0) \), \(\mu_2 = (0,3,0)\) and \(\mu_3 = (0,0,3) \) and the mixing proportion vector is \( \pi =  (0.57\overline{2}, 0.\overline{3}, 0.09\overline{4})  \).
+
+<<results = hide, cache = TRUE>>=
+RNGversion('4.0.3'); set.seed(1)
+library(autoMFA)
+MFA_fit_AMFA <- AMFA(testDataMFA, gmin=1, gmax=5)
+MFA_fit_amofa <- amofa(testDataMFA)
+@
+In this case, we have accepted all of the default inputs for the \code{amofa} method. For the \code{AMFA} method, we have specified a search for \(g\) over all integers between one and five.
+
+The output object \code{MFAfit} contains many useful pieces of information about the model and the fitting process, as described above. For example, we can obtain a summary of the model fitted using the \code{AMFA} method as follows. 
+
+<<>>=
+summary(MFA_fit_AMFA)
+@
+
+We can also inspect the model parameters in more detail by using the \code{print} method.
+
+<<>>=
+print(MFA_fit_AMFA)
+@
+
+From this output, we see that the model fitted using the \code{AMFA} method has correctly chosen a three component model. We can also see that the final model has a single factor for each component. However, the \code{AMFA} method strictly adheres to the Ledermann bound, which was \( q = 1 \) in this instance, so the only possible value for \(q\) that it considered was one. We can also see that the model has accurately inferred the underlying means of each component.
+
+If we want to know how long the models took to fit, then the following commands
+<<>>=
+(MFA_fit_AMFA$diagnostics$totalTime)
+(MFA_fit_amofa$diagnostics$totalTime)
+@
+tell us that it took approximately \Sexpr{round(MFA_fit_AMFA$diagnostics$totalTime,2)} seconds to fit the \code{AMFA} model and approximately \Sexpr{round(MFA_fit_amofa$diagnostics$totalTime,2)} seconds to fit the \code{amofa} model. Similarly, we can obtain the BIC of each model using the following code,
+<<>>=
+(MFA_fit_AMFA$diagnostics$bic)
+(MFA_fit_amofa$diagnostics$bic)
+@
+which was approximately \Sexpr{round(MFA_fit_AMFA$diagnostics$bic,2)} for the model fitted using the \code{AMFA} method and \Sexpr{round(MFA_fit_amofa$diagnostics$bic,2)} for the model fitted using the \code{amofa} method. So, in this example, although the model fitted using the \code{AMFA} method took longer to run, it obtained a lower BIC than the model fitted using the \code{amofa} method.
+
+Finally, it is often of interest to consider which component each of the data points has been assigned to. Each of the methods in \pkg{autoMFA} calculates the posterior probability that each data point belongs to each component in the mixture; the so-called responsibilities. Taking the maximum responsibility for each data point allows us to perform hard classifications, which are also included in the model output. We can access the responsibilities using the following code.
+
+<<>>=
+(head(MFA_fit_AMFA$clustering$responsibilities))
+(head(MFA_fit_amofa$clustering$responsibilities))
+@
+
+and the corresponding allocations using
+
+<<>>=
+(MFA_fit_AMFA$clustering$allocations[1:6])
+(MFA_fit_amofa$clustering$allocations[1:6])
+@
+
+For this example, we observe that both models have assigned the first six data points to the same cluster, albeit with different group labels. In fact, the allocations made by the two models are exactly the same in this example. We can visualise the full set of allocations using the \code{print} method, as shown in Figure~\ref{fig:MFA_AMFA}. We only include a plot for the model fitted using the \code{AMFA} method, since the model fitted using the \code{amofa} gives identical allocations.
+
+\begin{figure}
+\centering 
+<<cluster, fig = TRUE, width = 6, height = 6>>=
+plot(MFA_fit_AMFA)
+@
+\caption{The clustering allocations obtained by the model fitted using the \code{AMFA} method, obtained by using the \code{plot} method.} 
+\label{fig:MFA_AMFA}
+\end{figure}
+
+%\begin{figure}
+%\centering 
+%<<cluster, fig = TRUE, width = 6, height = 6>>=
+%plot(MFA_fit_amofa)
+%@
+%\caption{The clustering allocations obtained by the model fitted using the \code{amofa} method, obtained by using the %\code{plot} method.} 
+%\label{fig:MFA_amofa}
+%\end{figure}
+
+%% -- Summary/conclusions/discussion -------------------------------------------
+
+\section{Summary and discussion} \label{sec:summary}
+This article introduced the \pkg{autoMFA} package for \proglang{R}, which includes five methods for automatically fitting MFA models. The five available methods are \code{AMFA}, \code{AMFA\_inc}, \code{MFA\_ECM}, \code{amofa} and \code{vbmfa}. 
+
+The MFA model includes two hyperparameters: \(g\), the number of components and \(q\), the number of factors in each component. Each of the methods in this package attempts to infer these hyperparameters with as little input from the user as possible. 
+
+In addition, the package also provides useful diagnostic and clustering information of the fitted models, such as the log-likelihood history of the final model, the responsibilities and the clustering allocations of the fitted model.
+%% -- Optional special unnumbered sections -------------------------------------
+
+\section*{Computational details}
+
+The results in this paper were obtained using
+\proglang{R}~4.2.0 with the
+\pkg{autoMFA}~1.1.0 package. \proglang{R} itself
+and all packages used are available from the Comprehensive
+\proglang{R} Archive Network (CRAN) at
+\url{https://CRAN.R-project.org/}.
+
+%% -- Bibliography -------------------------------------------------------------
+%% - References need to be provided in a .bib BibTeX database.
+%% - All references should be made with \cite, \citet, \citep, \citealp etc.
+%%   (and never hard-coded). See the FAQ for details.
+%% - JSS-specific markup (\proglang, \pkg, \code) should be used in the .bib.
+%% - Titles in the .bib should be in title case.
+%% - DOIs should be included where available.
+
+\bibliography{refs}
+
+
+%% -- Appendix (if any) --------------------------------------------------------
+%% - After the bibliography with page break.
+%% - With proper section titles and _not_ just "Appendix".
+
+%% -----------------------------------------------------------------------------
+
+
+\end{document}
